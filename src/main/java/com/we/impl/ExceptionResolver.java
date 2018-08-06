@@ -19,6 +19,7 @@ public class ExceptionResolver {
       Class<?> parent = from.getSuperclass();
       while (Exception.class.isAssignableFrom(parent) && null == supplier) {
         supplier = this.exceptionMapping.get((Class<? extends Exception>) parent);
+        parent = parent.getSuperclass();
       }
     }
     return Optional.ofNullable(supplier);
