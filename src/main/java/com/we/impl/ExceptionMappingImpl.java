@@ -6,6 +6,7 @@ import com.we.ExceptionSupplier;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class ExceptionMappingImpl implements ExceptionMapping {
   private final ExceptionConfigurationImpl configuration;
@@ -34,10 +35,9 @@ public class ExceptionMappingImpl implements ExceptionMapping {
 
   @Override
   public ExceptionConfiguration to(ExceptionSupplier to) {
-    if (this.supplierCount + 1 != this.exceptionCount) {
+    if (++this.supplierCount != this.exceptionCount) {
       throw new IllegalArgumentException("less supplier");
     }
-    ++supplierCount;
     this.exceptionMapping.putIfAbsent(this.exception, to);
     this.exception = null;
     return this.configuration;
@@ -47,5 +47,18 @@ public class ExceptionMappingImpl implements ExceptionMapping {
     if (this.supplierCount != this.exceptionCount) {
       throw new IllegalArgumentException("exception class and exception supplier is not equal");
     }
+  }
+
+  @SuppressWarnings("unchecked")
+  Optional<ExceptionSupplier> getSupplier(Class<? extends Exception> from) {
+    ExceptionSupplier supplier = this.exceptionMapping.get(from);
+    if (null == supplier) {
+      Class<?> parent = from.getSuperclass();
+      while (Exception.class.isAssignableFrom(parent) && null == supplier) {
+        supplier = this.exceptionMapping.get((Class<? extends Exception>) parent);
+        parent = parent.getSuperclass();
+      }
+    }
+    return Optional.ofNullable(supplier);
   }
 }

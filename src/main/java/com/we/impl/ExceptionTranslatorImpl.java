@@ -8,10 +8,10 @@ import com.we.TryResultBlock;
 import java.util.Optional;
 
 public class ExceptionTranslatorImpl implements ExceptionTranslator {
-  private final ExceptionResolver resolver;
+  private final ExceptionMappingImpl exceptionMapping;
 
   ExceptionTranslatorImpl(ExceptionMappingImpl exceptionMapping) {
-    this.resolver = new ExceptionResolver(exceptionMapping.getExceptionMapping());
+    this.exceptionMapping = exceptionMapping;
   }
 
   @Override
@@ -33,7 +33,7 @@ public class ExceptionTranslatorImpl implements ExceptionTranslator {
   }
 
   private <T> T handleException(Exception e) {
-    Optional<ExceptionSupplier> supplier = this.resolver.getSupplier(e.getClass());
+    Optional<ExceptionSupplier> supplier = this.exceptionMapping.getSupplier(e.getClass());
     if (supplier.isPresent()) {
       throw supplier.get().get(e.getMessage(), e.getCause());
     } else {

@@ -7,7 +7,6 @@ import com.we.ExceptionTranslator;
 public class ExceptionConfigurationImpl implements ExceptionConfiguration {
   private final ExceptionMappingImpl mapping;
 
-
   ExceptionConfigurationImpl() {
     this.mapping = new ExceptionMappingImpl(this);
   }
