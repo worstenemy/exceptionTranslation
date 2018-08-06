@@ -19,6 +19,10 @@ public class ExceptionMappingImpl implements ExceptionMapping {
 
   private int supplierCount = 0;
 
+  ExceptionMappingImpl(ExceptionConfigurationImpl configuration) {
+    this.configuration = configuration;
+  }
+
   void setException(Class<? extends Exception> exception) {
     this.exception = exception;
     ++exceptionCount;
@@ -26,10 +30,6 @@ public class ExceptionMappingImpl implements ExceptionMapping {
 
   Map<Class<? extends Exception>, ExceptionSupplier> getExceptionMapping() {
     return exceptionMapping;
-  }
-
-  ExceptionMappingImpl(ExceptionConfigurationImpl configuration) {
-    this.configuration = configuration;
   }
 
   @Override
