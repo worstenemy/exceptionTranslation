@@ -11,14 +11,12 @@ import java.util.Optional;
 public class ExceptionMappingImpl implements ExceptionMapping {
   private final ExceptionConfigurationImpl configuration;
 
-  private final Map<Class<? extends Exception>, ExceptionSupplier> exceptionMapping =
+  private final Map<Class<?>, ExceptionSupplier> exceptionMapping =
     new HashMap<>(4);
 
-  private Class<? extends Exception> exception;
+  private Class<?> exception;
 
-  private int exceptionCount = 0;
-
-  private int supplierCount = 0;
+  private int counter = 0;
 
   ExceptionMappingImpl(ExceptionConfigurationImpl configuration) {
     this.configuration = configuration;
@@ -26,16 +24,12 @@ public class ExceptionMappingImpl implements ExceptionMapping {
 
   void setException(Class<? extends Exception> exception) {
     this.exception = exception;
-    ++exceptionCount;
-  }
-
-  Map<Class<? extends Exception>, ExceptionSupplier> getExceptionMapping() {
-    return exceptionMapping;
+    ++counter;
   }
 
   @Override
   public ExceptionConfiguration to(ExceptionSupplier to) {
-    if (++this.supplierCount != this.exceptionCount) {
+    if (--counter != 0) {
       throw new IllegalArgumentException("less supplier");
     }
     this.exceptionMapping.putIfAbsent(this.exception, to);
@@ -44,18 +38,17 @@ public class ExceptionMappingImpl implements ExceptionMapping {
   }
 
   void check() {
-    if (this.supplierCount != this.exceptionCount) {
+    if (this.counter != 0) {
       throw new IllegalArgumentException("exception class and exception supplier is not equal");
     }
   }
 
-  @SuppressWarnings("unchecked")
   Optional<ExceptionSupplier> getSupplier(Class<? extends Exception> from) {
     ExceptionSupplier supplier = this.exceptionMapping.get(from);
     if (null == supplier) {
       Class<?> parent = from.getSuperclass();
       while (Exception.class.isAssignableFrom(parent) && null == supplier) {
-        supplier = this.exceptionMapping.get((Class<? extends Exception>) parent);
+        supplier = this.exceptionMapping.get(parent);
         parent = parent.getSuperclass();
       }
     }
